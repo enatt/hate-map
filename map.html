@@ -1,0 +1,160 @@
+<html>
+  <head>
+    <link href="style.css" rel="stylesheet" />
+    <script src="js/d3.v7.js"></script>
+  </head>
+  <body>
+    <h1>Hate Map: An interactive study of hate crimes in the U.S.</h1>
+      <h3> Select Type of Hate Crime:</h3>
+
+      <div id = "selectionBox">
+        <script>
+        let racebox = d3
+        .select("#selectionBox")
+        .append("select")
+        .attr("id", "raceButton")
+
+        var raceGroups = ["All", "Anti-White", "Anti-Black", "Anti-Hispanic", "Anti-Asian", "Anti-Female", "Anti-Jewish", "Anti-LGBT"]
+
+        d3.select("#raceButton")
+        .selectAll("myOptions")
+          .data(raceGroups)
+        .enter()
+          .append("option")
+        .text(function (d) {return d;})
+        .attr("value", function(d) {return d;})
+        
+        </script>
+      </div>
+
+      </div>
+      <div id="part2" width="1500" height="500"></div>
+      <script src="https://unpkg.com/topojson@3"></script>
+      <script type="module">
+        // Consulted this SO post in resolving some issues with importing functions:
+        // https://stackoverflow.com/questions/48211891/import-functions-from-another-js-file-javascript
+        import {Legend} from "./legendfunction.js"
+        import {Wrap} from "./wrapfunction.js"
+        
+        // Defining map area
+        let mapbox = d3
+        .select("#part2")
+        .append("svg")
+        .attr("width", 1000)
+        .attr("height", 600)
+
+        // Used this post for guide in dealing with d3.max function:
+        // https://gist.github.com/mbostock/4062085
+        // Originally used max function, wasn't working, manually embeded instead
+        // function findMax(data_input){
+        //   var percapMax = d3.max(data_input, function(d) {return d.percap;})
+        //   return percapMax
+        // };
+
+        // Loading data, formatting, states
+        let data = await d3.csv("data/All.csv", function(d){
+          d.percap = +d.percap
+          return d;
+        })
+        const us = await d3.json("states-albers-10m.json");
+        const path = d3.geoPath();
+        const format = d => `${d}%`;
+        const states = topojson.feature(us, us.objects.states);
+        const statemap = new Map(states.features.map(d => [d.id, d]));
+
+        // Manually embedding max rates, max() function was throwing weird nums
+        let testing_df = 
+         {"All": 305.85, 
+          "Anti-Black": 101.08,
+          "Anti-Hispanic": 19.87,
+          "Anti-White": 31.03,
+          "Anti-Asian": 9.67,
+          "Anti-Female": 0.85,
+          "Anti-Jewish": 73.66,
+          "Anti-LGBT": 152.56
+         };
+      
+        // Original box for map
+        let mapbox_g = mapbox.append("g")
+        .selectAll("path")
+
+        // Original box for legend
+        let mapbox_legend = mapbox.append("g")
+        .attr("transform", "translate(610, 20)")
+
+        // Function to render map with given data
+        function renderMap(data){
+          // Define mapping from ID->rate and rate->fill color
+          const valuemap = new Map(data.map(d => [d.id, d.percap]));
+          const color = d3.scaleSequential([0, testing_df[d3.select("#raceButton").property("value")]], d3.interpolateOranges);
+
+          // Appending map with states, filling by crime ratess
+          mapbox_g
+          .data(topojson.feature(us, us.objects.states).features)
+          .join("path")
+            .attr("fill", d => color(valuemap.get(d.id)))
+            .attr("d", path)
+            .attr("id", function(d,i){return `${d.properties.name}`})
+          .append("title")
+            .text(d => `${d.properties.name} \n${valuemap.get(d.id)} hate crimes per 100,000 people`);
+
+          // Defining click event for each state
+          let ids_to_percap = new Map(data.map(d => [d.id, d.percap]));
+          mapbox.selectAll("path").on("click", 
+            function(event, d){d3.select("#stateDescrip").text(`${d.properties.name} has a hate crime rate of \n${ids_to_percap.get(d.id)} hate crimes per 100,000 people
+            for ${d3.select("#raceButton").property("value")} crime`)
+            .call(Wrap, 400)})
+
+          // Updating legend
+          mapbox_legend
+          .append(() => Legend(color, {title: "Hate Crimes Per 100k People", width: 260}))
+          .attr("id", "legend")
+        }
+        
+        function update(selectedBias){
+          // Remote current legend so as to not append multiple
+          d3.selectAll("#legend").remove();
+          let data = d3.csv(`data/${selectedBias}.csv`).then((data) => renderMap(data))
+        }
+
+        renderMap(data);
+
+        // When new race selected, re-render map
+        d3.select("#raceButton").on("change", function(d){
+          var selectedOption = d3.select(this).property("value")
+          update(selectedOption);
+        })
+
+        // Adding outline
+        mapbox.append("path")
+        .datum(topojson.mesh(us, us.objects.states, (a, b) => a !== b))
+        .attr("fill", "none")
+        .attr("stroke", "white")
+        .attr("stroke-linejoin", "round")
+        .attr("d", path); 
+
+        // Defining text box area
+        let descrip = d3
+        .select("#part2")
+        .append("svg")
+        .attr("width", 500)
+        .attr("height", 600)
+
+        descrip
+        .append("text")
+        .text("Description of Data")
+        .attr("x", 10)
+        .attr("y", 20)
+
+        descrip
+        .append("text")
+        .attr("id", "stateDescrip")
+        .text("")
+        .attr("x", 10)
+        .attr("y", 50)
+        .attr("width", 500)
+        .attr("height", 600)
+        
+      </script>
+  </body>
+</html>
