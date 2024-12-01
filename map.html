@@ -95,8 +95,6 @@
             .attr("fill", d => color(valuemap.get(d.id)))
             .attr("d", path)
             .attr("id", function(d,i){return `${d.properties.name}`})
-          .append("title")
-            .text(d => `${d.properties.name} \n${valuemap.get(d.id)} hate crimes per 100,000 people`);
 
           // Defining click event for each state
           let ids_to_percap = new Map(data.map(d => [d.id, d.percap]));
