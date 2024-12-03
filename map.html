@@ -27,8 +27,7 @@
         </script>
       </div>
 
-      </div>
-      <div id="part2" width="1500" height="500"></div>
+      <div id="mapdiv" width="1500" height="500"></div>
       <script src="https://unpkg.com/topojson@3"></script>
       <script type="module">
         // Consulted this SO post in resolving some issues with importing functions:
@@ -38,7 +37,7 @@
         
         // Defining map area
         let mapbox = d3
-        .select("#part2")
+        .select("#mapdiv")
         .append("svg")
         .attr("width", 1000)
         .attr("height", 600)
@@ -82,11 +81,21 @@
         let mapbox_legend = mapbox.append("g")
         .attr("transform", "translate(610, 20)")
 
+        let color_scales = {
+          "All": d3.interpolateOranges, 
+          "Anti-Black": d3.interpolatePurples,
+          "Anti-Hispanic": d3.interpolateReds,
+          "Anti-White": d3.interpolateGreens,
+          "Anti-Asian": d3.interpolatePuRd,
+          "Anti-Female": d3.interpolateGnBu,
+          "Anti-Jewish": d3.interpolateBlues,
+          "Anti-LGBT": d3.interpolatePuBuGn,
+        };
         // Function to render map with given data
         function renderMap(data){
           // Define mapping from ID->rate and rate->fill color
           const valuemap = new Map(data.map(d => [d.id, d.percap]));
-          const color = d3.scaleSequential([0, testing_df[d3.select("#raceButton").property("value")]], d3.interpolateOranges);
+          const color = d3.scaleSequential([0, testing_df[d3.select("#raceButton").property("value")]], color_scales[d3.select("#raceButton").property("value")]);
 
           // Appending map with states, filling by crime ratess
           mapbox_g
@@ -95,13 +104,15 @@
             .attr("fill", d => color(valuemap.get(d.id)))
             .attr("d", path)
             .attr("id", function(d,i){return `${d.properties.name}`})
+            .append("title")
+              .text(d=>`${d.properties.name}`)
 
           // Defining click event for each state
           let ids_to_percap = new Map(data.map(d => [d.id, d.percap]));
           mapbox.selectAll("path").on("click", 
-            function(event, d){d3.select("#stateDescrip").text(`${d.properties.name} has a hate crime rate of \n${ids_to_percap.get(d.id)} hate crimes per 100,000 people
+            function(event, d){d3.select("#stateDescrip").text(`${d.properties.name} has a hate crime rate of ${ids_to_percap.get(d.id)} hate crimes per 100,000 people
             for ${d3.select("#raceButton").property("value")} crime`)
-            .call(Wrap, 400)})
+            })
 
           // Updating legend
           mapbox_legend
@@ -130,29 +141,27 @@
         .attr("stroke", "white")
         .attr("stroke-linejoin", "round")
         .attr("d", path); 
-
+      </script>
+      <h3> Description of Data: </h3>
+      <div id="textboxdiv" width="1500" height="500"></div>
+    <script>
         // Defining text box area
         let descrip = d3
-        .select("#part2")
+        .select("#textboxdiv")
         .append("svg")
-        .attr("width", 500)
-        .attr("height", 600)
-
-        descrip
-        .append("text")
-        .text("Description of Data")
-        .attr("x", 10)
-        .attr("y", 20)
+        .attr("height", 500)
+        .attr("width", 1500)
 
         descrip
         .append("text")
         .attr("id", "stateDescrip")
         .text("")
-        .attr("x", 10)
-        .attr("y", 50)
-        .attr("width", 500)
-        .attr("height", 600)
-        
+        .attr("x", "50%")
+        .attr("y", 20)
+        .style("text-anchor", "middle")
+        // Help centering text within the svg
+        // https://stackoverflow.com/questions/5546346/how-to-place-and-center-text-in-an-svg-rectangle
+
       </script>
   </body>
 </html>

@@ -10,6 +10,9 @@ body {
   align-items: center;
   background-color: lightgray
 }
+h1{
+  font-size: 40px;
+}
 h1, h3 {
   display: flex;
   justify-content: center;
@@ -25,7 +28,6 @@ thead {
   font-weight: bold;
 }
 svg {
-  border: 1px solid black;
   display: flex;
   justify-content: center;
   align-items: center;
