@@ -5,18 +5,22 @@ section {
   margin: 1em;
 }
 body {
-  font-family:  'Trebuchet MS';
+  font-family: "Manrope", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
   justify-content: center;
   align-items: center;
-  background-color: lightgray
+  background-color: lightgray;
 }
 h1{
   font-size: 40px;
 }
-h1, h3 {
+h1, h3, h4 {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 0.5em;
 }
 table {
   margin: 1em;
@@ -41,5 +45,21 @@ div{
   justify-content: center;
   align-items: center;
   display: flex;
-  text-wrap: wrap;
+  margin: 0.5em;
+}
+span.selectedVar{
+  font-weight: bold;
+  color: red;
+  white-space: pre;
+}
+.clickbox{
+  margin-bottom: 0em;
+  margin-left: 20%;
+  margin-right: 20%;
+}
+div.description_box{
+  display: none;
+  margin-top: 0em;
+  margin-left: 20%;
+  margin-right: 20%;
 }

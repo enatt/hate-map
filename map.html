@@ -1,6 +1,9 @@
 <html>
   <head>
     <link href="style.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Quicksand:wght@300&display=swap" rel="stylesheet">
     <script src="js/d3.v7.js"></script>
   </head>
   <body>
@@ -110,8 +113,16 @@
           // Defining click event for each state
           let ids_to_percap = new Map(data.map(d => [d.id, d.percap]));
           mapbox.selectAll("path").on("click", 
-            function(event, d){d3.select("#stateDescrip").text(`${d.properties.name} has a hate crime rate of ${ids_to_percap.get(d.id)} hate crimes per 100,000 people
-            for ${d3.select("#raceButton").property("value")} crime`)
+            function(event, d){
+            // Defining variables based on selection
+            let selected_state = d.properties.name;
+            let selected_rate = ids_to_percap.get(d.id);
+            let selected_race = d3.select("#raceButton").property("value");
+            
+            d3.select(".description_box").style("display", "flex");
+            d3.select("#selectedState").text(" " + selected_state + " ")
+            d3.select("#selectedRate").text(" " + selected_rate + " ")
+            d3.select("#selectedBias").text(" " + selected_race + " ")
             })
 
           // Updating legend
@@ -142,26 +153,16 @@
         .attr("stroke-linejoin", "round")
         .attr("d", path); 
       </script>
-      <h3> Description of Data: </h3>
-      <div id="textboxdiv" width="1500" height="500"></div>
-    <script>
-        // Defining text box area
-        let descrip = d3
-        .select("#textboxdiv")
-        .append("svg")
-        .attr("height", 500)
-        .attr("width", 1500)
 
-        descrip
-        .append("text")
-        .attr("id", "stateDescrip")
-        .text("")
-        .attr("x", "50%")
-        .attr("y", 20)
-        .style("text-anchor", "middle")
-        // Help centering text within the svg
-        // https://stackoverflow.com/questions/5546346/how-to-place-and-center-text-in-an-svg-rectangle
+      <h3 class="clickbox"> Click a State to Learn More:</h3>
+        <div class = "description_box">
+            <span class = "selectedVar" id ="selectedState"> </span> 
+            has a hate crime rate of
+            <span class = "selectedVar" id="selectedRate"> </span> 
+            hate crimes per 100,000 people for 
+            <span class="selectedVar" id="selectedBias"> </span>
+            crime
+        </div>
 
-      </script>
   </body>
 </html>
