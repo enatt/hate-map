@@ -35,8 +35,7 @@
       <script type="module">
         // Consulted this SO post in resolving some issues with importing functions:
         // https://stackoverflow.com/questions/48211891/import-functions-from-another-js-file-javascript
-        import {Legend} from "./legendfunction.js"
-        import {Wrap} from "./wrapfunction.js"
+        import {Legend} from "/js/legendfunction.js"
         
         // Defining map area
         let mapbox = d3
@@ -58,7 +57,7 @@
           d.percap = +d.percap
           return d;
         })
-        const us = await d3.json("states-albers-10m.json");
+        const us = await d3.json("data/states-albers-10m.json");
         const path = d3.geoPath();
         const format = d => `${d}%`;
         const states = topojson.feature(us, us.objects.states);
